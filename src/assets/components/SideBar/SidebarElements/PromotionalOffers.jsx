@@ -8,17 +8,18 @@ const API = "https://bright-ants-backend.onrender.com";
 const PromotionalOffers = () => {
   const { token } = useAuth();
   const [offers, setOffers] = useState([]);
+
   const [form, setForm] = useState({
     id: null,
     title: '',
     description: '',
-    image: null, // File object
-    existingImage: null,
+    images: { image1: null, image2: null, image3: null },
+    existingImages: ['', '', ''],
   });
+
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch all offers
   const fetchOffers = async () => {
     try {
       const res = await fetch(`${API}/promotional-offers`);
@@ -35,8 +36,11 @@ const PromotionalOffers = () => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === 'image') {
-      setForm({ ...form, image: files[0] });
+    if (name.startsWith('image')) {
+      setForm({
+        ...form,
+        images: { ...form.images, [name]: files[0] || null },
+      });
     } else {
       setForm({ ...form, [name]: value });
     }
@@ -47,82 +51,111 @@ const PromotionalOffers = () => {
       id: null,
       title: '',
       description: '',
-      image: null,
-      existingImage: null
+      images: { image1: null, image2: null, image3: null },
+      existingImages: ['', '', ''],
     });
     setIsEditing(false);
   };
 
+  const handleRemoveExistingImage = (index) => {
+    const updatedExisting = [...form.existingImages];
+    updatedExisting[index] = '';
+    const updatedImages = { ...form.images };
+    updatedImages[`image${index + 1}`] = null;
+
+    setForm({
+      ...form,
+      existingImages: updatedExisting,
+      images: updatedImages,
+    });
+  };
+
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!form.title || !form.description) {
-    return Swal.fire("Warning", "Please fill in all fields", "warning");
-  }
+    // Prevent adding new offers beyond limit
+    if (!isEditing && offers.length >= 4) {
+      return Swal.fire("Limit Reached", "You can only have a maximum of 4 promotional offers.", "warning");
+    }
 
-  try {
-    setIsLoading(true);
+    if (!form.title || !form.description) {
+      return Swal.fire("Warning", "Please fill in all fields", "warning");
+    }
 
-    let imageName = form.existingImage;
+    try {
+      setIsLoading(true);
 
-    if (form.image instanceof File) {
+      let imageNames = form.existingImages.filter(Boolean);
+
       const formData = new FormData();
-      formData.append('file', form.image);
+      let hasNewImage = false;
 
-      const uploadRes = await fetch(`${API}/files`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          Authorization: `Bearer ${token}`
+      Object.values(form.images).forEach((img) => {
+        if (img) {
+          formData.append('file', img);
+          hasNewImage = true;
         }
       });
 
-      if (!uploadRes.ok) throw new Error("Image upload failed");
+      if (hasNewImage) {
+        const uploadRes = await fetch(`${API}/files`, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-      const uploadData = await uploadRes.json();
-      imageName = uploadData.files[0].name;
+        if (!uploadRes.ok) throw new Error("Image upload failed");
+
+        const uploadData = await uploadRes.json();
+        const uploadedImageNames = uploadData.files.map(file => file.name);
+        imageNames = [...imageNames, ...uploadedImageNames];
+      }
+
+      const payload = {
+        title: form.title,
+        description: form.description,
+        images: imageNames,
+      };
+
+      const method = isEditing ? 'PATCH' : 'POST';
+      const endpoint = isEditing
+        ? `${API}/promotional-offers/${form.id}`
+        : `${API}/promotional-offers`;
+
+      const res = await fetch(endpoint, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) throw new Error("Failed to save promotional offer");
+
+      Swal.fire("Success", isEditing ? "Offer updated" : "Offer added", "success");
+      resetForm();
+      fetchOffers();
+    } catch (err) {
+      Swal.fire("Error", err.message, "error");
+    } finally {
+      setIsLoading(false);
     }
-
-    const payload = {
-      title: form.title,
-      description: form.description,
-      images: imageName ? [imageName] : []
-    };
-
-    const method = isEditing ? 'PATCH' : 'POST';
-    const endpoint = isEditing
-      ? `${API}/promotional-offers/${form.id}`
-      : `${API}/promotional-offers`;
-
-    const res = await fetch(endpoint, {
-      method,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) throw new Error("Failed to save promotional offer");
-
-    Swal.fire("Success", isEditing ? "Offer updated" : "Offer added", "success");
-    resetForm();
-    fetchOffers();
-  } catch (err) {
-    Swal.fire("Error", err.message, "error");
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+  };
 
   const handleEdit = (offer) => {
     setForm({
       id: offer.id,
       title: offer.title,
       description: offer.description,
-      image: null,
-      existingImage: offer.images?.[0] || null
+      images: { image1: null, image2: null, image3: null },
+      existingImages: offer.images.length === 3 ? offer.images : [
+        offer.images[0] || '',
+        offer.images[1] || '',
+        offer.images[2] || '',
+      ],
     });
     setIsEditing(true);
   };
@@ -135,13 +168,13 @@ const PromotionalOffers = () => {
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!"
+      confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           await fetch(`${API}/promotional-offers/${id}`, {
             method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
           });
           Swal.fire("Deleted!", "Offer has been deleted.", "success");
           fetchOffers();
@@ -158,6 +191,12 @@ const PromotionalOffers = () => {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="bg-white shadow-md rounded p-6 mb-10 space-y-4">
+        {!isEditing && offers.length >= 4 && (
+          <div className="text-red-600 font-semibold">
+            Maximum of 4 offers allowed. Please delete an existing one to add a new offer.
+          </div>
+        )}
+
         <input
           type="text"
           name="title"
@@ -166,6 +205,7 @@ const PromotionalOffers = () => {
           value={form.title}
           onChange={handleChange}
           required
+          disabled={!isEditing && offers.length >= 4}
         />
         <textarea
           name="description"
@@ -174,29 +214,59 @@ const PromotionalOffers = () => {
           value={form.description}
           onChange={handleChange}
           required
-        />
-        <input
-          type="file"
-          name="image"
-          className="file-input file-input-bordered w-full"
-          onChange={handleChange}
-          accept="image/*"
+          disabled={!isEditing && offers.length >= 4}
         />
 
-        {form.existingImage && isEditing && (
-          <div className="mt-2">
-            <p className="text-sm text-gray-600 mb-1">Current Image:</p>
-            <img
-              src={`${API}/files/${form.existingImage}`}
-              alt="Existing"
-              className="w-32 h-32 object-cover rounded border"
-              onError={(e) => (e.target.src = '/placeholder-image.jpg')}
-            />
-          </div>
-        )}
+        {[1, 2, 3].map((num) => {
+          const existingImage = form.existingImages[num - 1];
+          const newImage = form.images[`image${num}`];
+          return (
+            <div key={num}>
+              <label className="block font-medium mb-1">Image {num}</label>
+              <input
+                type="file"
+                name={`image${num}`}
+                className="file-input file-input-bordered w-full"
+                onChange={handleChange}
+                accept="image/*"
+                disabled={!isEditing && offers.length >= 4}
+              />
+              {existingImage && !newImage && (
+                <div className="flex items-center gap-2 mt-1">
+                  <img
+                    src={`${API}/files/${existingImage}`}
+                    alt={`Existing Image ${num}`}
+                    className="w-24 h-24 object-cover rounded border"
+                    onError={(e) => (e.target.src = '/placeholder-image.jpg')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveExistingImage(num - 1)}
+                    className="btn btn-sm btn-error"
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+              {newImage && (
+                <div className="mt-1">
+                  <img
+                    src={URL.createObjectURL(newImage)}
+                    alt={`Selected Image ${num}`}
+                    className="w-24 h-24 object-cover rounded border"
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
 
-        <div className="flex gap-4">
-          <button type="submit" className="btn btn-primary" disabled={isLoading}>
+        <div className="flex gap-4 mt-4">
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={isLoading || (!isEditing && offers.length >= 4)}
+          >
             {isEditing ? "Update Offer" : "Add Offer"}
           </button>
           {isEditing && (
@@ -207,21 +277,26 @@ const PromotionalOffers = () => {
         </div>
       </form>
 
-      {/* List */}
+      {/* List of offers */}
       <div className="grid gap-6">
         {offers.map((offer) => (
-          <div key={offer.id} className="bg-white shadow rounded p-4 flex gap-4 items-start">
-            <img
-              src={`${API}/files/${offer.images?.[0]}`}
-              alt={offer.title}
-              className="w-24 h-24 object-cover rounded"
-              onError={(e) => (e.target.src = "/placeholder-image.jpg")}
-            />
-            <div className="flex-grow">
+          <div key={offer.id} className="bg-white shadow rounded p-4 flex flex-col gap-4">
+            <div className="flex gap-2">
+              {(offer.images || []).map((img, idx) => (
+                <img
+                  key={idx}
+                  src={`${API}/files/${img}`}
+                  alt={`${offer.title} ${idx + 1}`}
+                  className="w-24 h-24 object-cover rounded"
+                  onError={(e) => (e.target.src = "/placeholder-image.jpg")}
+                />
+              ))}
+            </div>
+            <div>
               <h2 className="text-xl font-semibold">{offer.title}</h2>
               <p className="mt-2">{offer.description}</p>
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex gap-2">
               <button onClick={() => handleEdit(offer)} className="btn btn-sm btn-info">Edit</button>
               <button onClick={() => handleDelete(offer.id)} className="btn btn-sm btn-error">Delete</button>
             </div>
