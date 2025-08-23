@@ -37,10 +37,11 @@ const Sidebar = () => {
                     <NavItem to="/carousel" icon={<FaImages />} label="Carousel" />
                     <NavItem to="/testimonial" icon={<FaQuoteRight />} label="Testimonial" />
                     <NavItem to="/promotions" icon={<FaTags />} label="Promotional Offers" />
+                    <NavItem to="/offers" icon={<FaEnvelope />} label="Offers" />
                     <NavItem to="/videoAdmin" icon={<FaVideo />} label="VideoAdmin" />
                     <NavItem to="/attorney" icon={<FaGavel />} label="Attorney" />
                     <NavItem to="/work" icon={<FaBriefcase />} label="Work" />
-                    <NavItem to="/contact" icon={<FaEnvelope />} label="Contact Us" />
+                    
                 </nav>
             </div>
 

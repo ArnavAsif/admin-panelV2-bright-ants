@@ -11,11 +11,11 @@ import Testimonial from './assets/components/SideBar/SidebarElements/Testimonial
 import PromotionalOffers from './assets/components/SideBar/SidebarElements/PromotionalOffers.jsx';
 import Attorney from './assets/components/SideBar/SidebarElements/Attorney.jsx';
 import Work from './assets/components/SideBar/SidebarElements/Work.jsx';
-import ContactUs from './assets/components/SideBar/SidebarElements/ContactUs.jsx';
 import LoginPage from './assets/components/Login/LoginPage.jsx';
 import ProtectedRoute from './assets/components/auth/ProtectedRoute.jsx';
 import { AuthProvider } from './assets/components/auth/AuthProvider.jsx';
 import VideoAdmin from './assets/components/SideBar/SidebarElements/VideoAdmin.jsx';
+import Offers from './assets/components/SideBar/SidebarElements/Offers.jsx';
 
 const router = createBrowserRouter([
   {
@@ -37,7 +37,7 @@ const router = createBrowserRouter([
           { path: 'videoAdmin', element: <VideoAdmin /> },
           { path: 'attorney', element: <Attorney /> },
           { path: 'work', element: <Work /> },
-          { path: 'contact', element: <ContactUs /> },
+          { path: 'offers', element: <Offers /> },
         ]
       },
     ]

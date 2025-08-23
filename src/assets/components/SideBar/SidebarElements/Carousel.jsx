@@ -157,7 +157,7 @@ const Carousel = () => {
     );
 
     return (
-        <div className="p-6 max-w-4xl mx-auto">
+        <div className="p-6 max-w-4xl mx-auto text-black">
             <h1 className="text-2xl font-bold mb-6">Media Management</h1>
             {renderRow(1, filesRow1)}
             {renderRow(2, filesRow2)}
