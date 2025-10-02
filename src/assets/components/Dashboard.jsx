@@ -54,6 +54,7 @@ const Dashboard = () => {
   ];
 
   return (
+    
     <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-3xl font-bold text-gray-800 mb-8">Admin Dashboard</h1>
 
@@ -96,6 +97,7 @@ const Dashboard = () => {
                 <div className="text-sm text-gray-400">
                   Uploaded on {upload.date}
                 </div>
+                
               </div>
               <button className="text-blue-600 hover:underline text-sm">View</button>
             </li>

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-import React, { useEffect, useState } from 'react';
-import Swal from 'sweetalert2';
-import { useAuth } from '../../auth/AuthProvider';
+import React, { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import { useAuth } from "../../auth/AuthProvider";
 
 const API = "https://bright-ants-backend.onrender.com";
 
@@ -11,10 +11,10 @@ const PromotionalOffers = () => {
 
   const [form, setForm] = useState({
     id: null,
-    title: '',
-    description: '',
+    title: "",
+    description: "",
     images: { image1: null, image2: null, image3: null },
-    existingImages: ['', '', ''],
+    existingImages: ["", "", ""],
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -36,7 +36,7 @@ const PromotionalOffers = () => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name.startsWith('image')) {
+    if (name.startsWith("image")) {
       setForm({
         ...form,
         images: { ...form.images, [name]: files[0] || null },
@@ -49,17 +49,17 @@ const PromotionalOffers = () => {
   const resetForm = () => {
     setForm({
       id: null,
-      title: '',
-      description: '',
+      title: "",
+      description: "",
       images: { image1: null, image2: null, image3: null },
-      existingImages: ['', '', ''],
+      existingImages: ["", "", ""],
     });
     setIsEditing(false);
   };
 
   const handleRemoveExistingImage = (index) => {
     const updatedExisting = [...form.existingImages];
-    updatedExisting[index] = '';
+    updatedExisting[index] = "";
     const updatedImages = { ...form.images };
     updatedImages[`image${index + 1}`] = null;
 
@@ -75,7 +75,11 @@ const PromotionalOffers = () => {
 
     // Prevent adding new offers beyond limit
     if (!isEditing && offers.length >= 4) {
-      return Swal.fire("Limit Reached", "You can only have a maximum of 4 promotional offers.", "warning");
+      return Swal.fire(
+        "Limit Reached",
+        "You can only have a maximum of 4 promotional offers.",
+        "warning"
+      );
     }
 
     if (!form.title || !form.description) {
@@ -92,14 +96,14 @@ const PromotionalOffers = () => {
 
       Object.values(form.images).forEach((img) => {
         if (img) {
-          formData.append('file', img);
+          formData.append("file", img);
           hasNewImage = true;
         }
       });
 
       if (hasNewImage) {
         const uploadRes = await fetch(`${API}/files`, {
-          method: 'POST',
+          method: "POST",
           body: formData,
           headers: {
             Authorization: `Bearer ${token}`,
@@ -109,7 +113,7 @@ const PromotionalOffers = () => {
         if (!uploadRes.ok) throw new Error("Image upload failed");
 
         const uploadData = await uploadRes.json();
-        const uploadedImageNames = uploadData.files.map(file => file.name);
+        const uploadedImageNames = uploadData.files.map((file) => file.name);
         imageNames = [...imageNames, ...uploadedImageNames];
       }
 
@@ -119,7 +123,7 @@ const PromotionalOffers = () => {
         images: imageNames,
       };
 
-      const method = isEditing ? 'PATCH' : 'POST';
+      const method = isEditing ? "PATCH" : "POST";
       const endpoint = isEditing
         ? `${API}/promotional-offers/${form.id}`
         : `${API}/promotional-offers`;
@@ -127,7 +131,7 @@ const PromotionalOffers = () => {
       const res = await fetch(endpoint, {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
@@ -135,7 +139,11 @@ const PromotionalOffers = () => {
 
       if (!res.ok) throw new Error("Failed to save promotional offer");
 
-      Swal.fire("Success", isEditing ? "Offer updated" : "Offer added", "success");
+      Swal.fire(
+        "Success",
+        isEditing ? "Offer updated" : "Offer added",
+        "success"
+      );
       resetForm();
       fetchOffers();
     } catch (err) {
@@ -151,11 +159,14 @@ const PromotionalOffers = () => {
       title: offer.title,
       description: offer.description,
       images: { image1: null, image2: null, image3: null },
-      existingImages: offer.images.length === 3 ? offer.images : [
-        offer.images[0] || '',
-        offer.images[1] || '',
-        offer.images[2] || '',
-      ],
+      existingImages:
+        offer.images.length === 3
+          ? offer.images
+          : [
+              offer.images[0] || "",
+              offer.images[1] || "",
+              offer.images[2] || "",
+            ],
     });
     setIsEditing(true);
   };
@@ -186,14 +197,20 @@ const PromotionalOffers = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto text-black">
-      <h1 className="text-2xl font-bold mb-6">Promotional Offers Management</h1>
+    <div className="p-6 max-w-4xl mx-auto text-black dark:text-white">
+      <h1 className="text-2xl font-bold mb-6 text-black">
+        Promotional Offers Management
+      </h1>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded p-6 mb-10 space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow-md rounded p-6 mb-10 space-y-4"
+      >
         {!isEditing && offers.length >= 4 && (
           <div className="text-red-600 font-semibold">
-            Maximum of 4 offers allowed. Please delete an existing one to add a new offer.
+            Maximum of 4 offers allowed. Please delete an existing one to add a
+            new offer.
           </div>
         )}
 
@@ -237,7 +254,7 @@ const PromotionalOffers = () => {
                     src={`${API}/files/${existingImage}`}
                     alt={`Existing Image ${num}`}
                     className="w-24 h-24 object-cover rounded border"
-                    onError={(e) => (e.target.src = '/placeholder-image.jpg')}
+                    onError={(e) => (e.target.src = "/placeholder-image.jpg")}
                   />
                   <button
                     type="button"
@@ -270,7 +287,11 @@ const PromotionalOffers = () => {
             {isEditing ? "Update Offer" : "Add Offer"}
           </button>
           {isEditing && (
-            <button type="button" className="btn btn-secondary" onClick={resetForm}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={resetForm}
+            >
               Cancel
             </button>
           )}
@@ -280,7 +301,10 @@ const PromotionalOffers = () => {
       {/* List of offers */}
       <div className="grid gap-6">
         {offers.map((offer) => (
-          <div key={offer.id} className="bg-white shadow rounded p-4 flex flex-col gap-4">
+          <div
+            key={offer.id}
+            className="bg-white shadow rounded p-4 flex flex-col gap-4"
+          >
             <div className="flex gap-2">
               {(offer.images || []).map((img, idx) => (
                 <img
@@ -293,12 +317,24 @@ const PromotionalOffers = () => {
               ))}
             </div>
             <div>
-              <h2 className="text-xl font-semibold">{offer.title}</h2>
-              <p className="mt-2">{offer.description}</p>
+              <h2 className="text-xl font-semibold text-black">
+                {offer.title}
+              </h2>
+              <p className="mt-2 text-black">{offer.description}</p>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => handleEdit(offer)} className="btn btn-sm btn-info">Edit</button>
-              <button onClick={() => handleDelete(offer.id)} className="btn btn-sm btn-error">Delete</button>
+              <button
+                onClick={() => handleEdit(offer)}
+                className="btn btn-sm btn-info"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(offer.id)}
+                className="btn btn-sm btn-error"
+              >
+                Delete
+              </button>
             </div>
           </div>
         ))}

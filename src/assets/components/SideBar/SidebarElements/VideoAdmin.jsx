@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import Swal from 'sweetalert2';
-import { useAuth } from '../../auth/AuthProvider';
+import React, { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import { useAuth } from "../../auth/AuthProvider";
 
-const API = 'https://bright-ants-backend.onrender.com';
+const API = "https://bright-ants-backend.onrender.com";
 
 const VideoAdmin = () => {
   const { token } = useAuth();
@@ -12,7 +12,7 @@ const VideoAdmin = () => {
 
   useEffect(() => {
     fetch(`${API}/files/video.mp4`, {
-      method: 'HEAD'
+      method: "HEAD",
     }).then((res) => {
       if (res.ok) {
         setVideoUrl(`${API}/files/video.mp4`);
@@ -29,23 +29,23 @@ const VideoAdmin = () => {
     e.preventDefault();
 
     if (!videoFile) {
-      return Swal.fire('Warning', 'Please select a video file', 'warning');
+      return Swal.fire("Warning", "Please select a video file", "warning");
     }
 
     try {
       setLoading(true); // 🔄 Start loading
       const formData = new FormData();
-      formData.append('file', videoFile);
+      formData.append("file", videoFile);
 
       const res = await fetch(`${API}/files`, {
-        method: 'POST',
+        method: "POST",
         body: formData,
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
-      if (!res.ok) throw new Error('Video upload failed');
+      if (!res.ok) throw new Error("Video upload failed");
 
       const data = await res.json();
       const uploadedFile = data.files?.[0]?.name;
@@ -53,10 +53,10 @@ const VideoAdmin = () => {
       if (uploadedFile) {
         setVideoUrl(`${API}/files/${uploadedFile}`);
         setVideoFile(null);
-        Swal.fire('Success', 'Video uploaded successfully', 'success');
+        Swal.fire("Success", "Video uploaded successfully", "success");
       }
     } catch (err) {
-      Swal.fire('Error', err.message, 'error');
+      Swal.fire("Error", err.message, "error");
     } finally {
       setLoading(false); // 🔄 End loading
     }
@@ -64,23 +64,23 @@ const VideoAdmin = () => {
 
   const handleDelete = () => {
     Swal.fire({
-      title: 'Are you sure?',
-      text: 'This will remove the video from the admin panel (not from server).',
-      icon: 'warning',
+      title: "Are you sure?",
+      text: "This will remove the video from the admin panel (not from server).",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'Yes, delete it!',
-      confirmButtonColor: '#d33'
+      confirmButtonText: "Yes, delete it!",
+      confirmButtonColor: "#d33",
     }).then((result) => {
       if (result.isConfirmed) {
         setVideoUrl(null);
-        Swal.fire('Deleted!', 'Video removed from view.', 'success');
+        Swal.fire("Deleted!", "Video removed from view.", "success");
       }
     });
   };
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Video Management</h1>
+      <h1 className="text-2xl font-bold mb-6 text-black">Video Management</h1>
 
       {/* Upload form if no video */}
       {!videoUrl && (
@@ -95,15 +95,11 @@ const VideoAdmin = () => {
             disabled={loading}
             className="file-input file-input-bordered w-full"
           />
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={loading}
-          >
+          <button type="submit" className="btn btn-primary" disabled={loading}>
             {loading ? (
               <span className="loading loading-spinner"></span>
             ) : (
-              'Upload Video'
+              "Upload Video"
             )}
           </button>
         </form>

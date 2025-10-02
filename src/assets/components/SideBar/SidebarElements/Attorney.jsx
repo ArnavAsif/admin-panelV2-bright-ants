@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
-import React, { useEffect, useState } from 'react';
-import Swal from 'sweetalert2';
-import { useAuth } from '../../auth/AuthProvider';
+import React, { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import { useAuth } from "../../auth/AuthProvider";
 
 const API = "https://bright-ants-backend.onrender.com";
 
@@ -10,9 +10,9 @@ const Attorney = () => {
   const [attorneys, setAttorneys] = useState([]);
   const [form, setForm] = useState({
     id: null,
-    name: '',
-    designation: '',
-    image: null, // File object
+    name: "",
+    designation: "",
+    image: null,
     existingImage: null,
   });
   const [isEditing, setIsEditing] = useState(false);
@@ -35,7 +35,7 @@ const Attorney = () => {
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    if (name === 'image') {
+    if (name === "image") {
       setForm({ ...form, image: files[0] });
     } else {
       setForm({ ...form, [name]: value });
@@ -45,8 +45,8 @@ const Attorney = () => {
   const resetForm = () => {
     setForm({
       id: null,
-      name: '',
-      designation: '',
+      name: "",
+      designation: "",
       image: null,
       existingImage: null,
     });
@@ -66,14 +66,14 @@ const Attorney = () => {
 
       if (form.image instanceof File) {
         const formData = new FormData();
-        formData.append('file', form.image);
+        formData.append("file", form.image);
 
         const uploadRes = await fetch(`${API}/files`, {
-          method: 'POST',
+          method: "POST",
           body: formData,
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         if (!uploadRes.ok) throw new Error("Image upload failed");
@@ -88,7 +88,7 @@ const Attorney = () => {
         image: imageName,
       };
 
-      const method = isEditing ? 'PATCH' : 'POST';
+      const method = isEditing ? "PATCH" : "POST";
       const endpoint = isEditing
         ? `${API}/attorneys/${form.id}`
         : `${API}/attorneys`;
@@ -96,15 +96,19 @@ const Attorney = () => {
       const res = await fetch(endpoint, {
         method,
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) throw new Error("Failed to save attorney");
 
-      Swal.fire("Success", isEditing ? "Attorney updated" : "Attorney added", "success");
+      Swal.fire(
+        "Success",
+        isEditing ? "Attorney updated" : "Attorney added",
+        "success"
+      );
       resetForm();
       fetchAttorneys();
     } catch (err) {
@@ -133,13 +137,13 @@ const Attorney = () => {
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!"
+      confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           await fetch(`${API}/attorneys/${id}`, {
             method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
           });
           Swal.fire("Deleted!", "Attorney has been deleted.", "success");
           fetchAttorneys();
@@ -152,10 +156,15 @@ const Attorney = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Attorneys Management</h1>
+      <h1 className="text-2xl font-bold mb-6 text-black">
+        Attorneys Management
+      </h1>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded p-6 mb-10 space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow-md rounded p-6 mb-10 space-y-4"
+      >
         <input
           type="text"
           name="name"
@@ -189,17 +198,25 @@ const Attorney = () => {
               src={`${API}/files/${form.existingImage}`}
               alt="Existing"
               className="w-32 h-32 object-cover rounded border"
-              onError={(e) => (e.target.src = '/placeholder-image.jpg')}
+              onError={(e) => (e.target.src = "/placeholder-image.jpg")}
             />
           </div>
         )}
 
         <div className="flex gap-4">
-          <button type="submit" className="btn btn-primary" disabled={isLoading}>
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={isLoading}
+          >
             {isEditing ? "Update Attorney" : "Add Attorney"}
           </button>
           {isEditing && (
-            <button type="button" className="btn btn-secondary" onClick={resetForm}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={resetForm}
+            >
               Cancel
             </button>
           )}
@@ -209,7 +226,10 @@ const Attorney = () => {
       {/* List */}
       <div className="grid gap-6">
         {attorneys.map((attorney) => (
-          <div key={attorney.id} className="bg-white shadow rounded p-4 flex gap-4 items-start">
+          <div
+            key={attorney.id}
+            className="bg-white shadow rounded p-4 flex gap-4 items-start"
+          >
             <img
               src={`${API}/files/${attorney.image}`}
               alt={attorney.name}
@@ -217,12 +237,24 @@ const Attorney = () => {
               onError={(e) => (e.target.src = "/placeholder-image.jpg")}
             />
             <div className="flex-grow">
-              <h2 className="text-xl font-semibold">{attorney.name}</h2>
+              <h2 className="text-xl font-semibold text-black">
+                {attorney.name}
+              </h2>
               <p className="text-gray-600">{attorney.designation}</p>
             </div>
             <div className="flex flex-col gap-2">
-              <button onClick={() => handleEdit(attorney)} className="btn btn-sm btn-info">Edit</button>
-              <button onClick={() => handleDelete(attorney.id)} className="btn btn-sm btn-error">Delete</button>
+              <button
+                onClick={() => handleEdit(attorney)}
+                className="btn btn-sm btn-info"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDelete(attorney.id)}
+                className="btn btn-sm btn-error"
+              >
+                Delete
+              </button>
             </div>
           </div>
         ))}

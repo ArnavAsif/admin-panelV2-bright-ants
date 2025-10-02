@@ -29,7 +29,9 @@ const Offers = () => {
       const res = await fetch(`${API}/offers`);
       const data = await res.json();
       const processedOffers = (data.data || []).map((offer) => {
-        const [description1, description2] = splitDescription(offer.description);
+        const [description1, description2] = splitDescription(
+          offer.description
+        );
         return { ...offer, description1, description2 };
       });
       setOffers(processedOffers);
@@ -72,7 +74,11 @@ const Offers = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ title, description: combinedDescription, price: Number(price) }),
+        body: JSON.stringify({
+          title,
+          description: combinedDescription,
+          price: Number(price),
+        }),
       });
 
       if (!res.ok) throw new Error("Failed to add offer");
@@ -145,7 +151,7 @@ const Offers = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Offer Management</h1>
+      <h1 className="text-2xl font-bold mb-6 text-black">Offer Management</h1>
 
       {/* Add New Offer or Limit Message */}
       {offers.length >= 3 ? (
@@ -231,7 +237,12 @@ const OfferItem = ({ offer, onEdit, onDelete, isLoading }) => {
   };
 
   const saveEdit = () => {
-    if (!formData.title || !formData.description1 || !formData.description2 || !formData.price) {
+    if (
+      !formData.title ||
+      !formData.description1 ||
+      !formData.description2 ||
+      !formData.price
+    ) {
       Swal.fire("Error", "All fields are required", "error");
       return;
     }
@@ -281,7 +292,7 @@ const OfferItem = ({ offer, onEdit, onDelete, isLoading }) => {
           </div>
         ) : (
           <div>
-            <p className="text-lg font-semibold">{offer.title}</p>
+            <p className="text-lg font-semibold text-black">{offer.title}</p>
             <p className="text-gray-600">{offer.description1}</p>
             <p className="text-gray-600">{offer.description2}</p>
             <p className="text-sm text-gray-500">Price: ${offer.price}</p>
