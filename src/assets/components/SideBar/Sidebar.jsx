@@ -10,6 +10,7 @@ import {
   FaEnvelope,
   FaSignOutAlt,
   FaVideo,
+  FaBlog,
 } from "react-icons/fa";
 import { useAuth } from "../auth/AuthProvider";
 
@@ -48,9 +49,10 @@ const Sidebar = () => {
           <NavItem to="/videoAdmin" icon={<FaVideo />} label="VideoAdmin" />
           <NavItem to="/attorney" icon={<FaGavel />} label="Attorney" />
           <NavItem to="/work" icon={<FaBriefcase />} label="Work" />
+          <NavItem to="/blog" icon={<FaBlog />} label="Blog" />
         </nav>
       </div>
-      
+
       {/* Logout */}
       <div>
         <button
